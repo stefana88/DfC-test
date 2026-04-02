@@ -1,0 +1,2330 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Well-Architected Security Assessment Workbook\r\n\r\n<img src=\"https://learn.microsoft.com/en-us/azure/well-architected/_images/well-architected-hub.png\" alt=\"Well-architected framework pillars\" style=\"width: 40%; height: auto;\" />\r\n\r\nFor more information visit [Microsoft Azure Well-Architected Framework](https://docs.microsoft.com/en-us/azure/architecture/framework/security/)"
+      },
+      "name": "text - 9"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "51aa3a9b-14e0-4c22-a60d-abdbf8813f00",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "includeAll": true,
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "defaultValue": "value::all",
+            "value": [
+              "value::all"
+            ]
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 0"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "4b846956-4fa8-4d35-b396-74a87200f819",
+            "version": "KqlParameterItem/1.0",
+            "name": "RG_Filter",
+            "label": "Filter By",
+            "type": 2,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "jsonData": "[\r\n    { \"value\":\"Resource Group\",\"selected\":\"true\"},\r\n    { \"value\":\"Tags\" }\r\n]",
+            "timeContext": {
+              "durationMs": 86400000
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 2"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "6cb303fd-4812-4097-a468-a177d8782913",
+            "version": "KqlParameterItem/1.0",
+            "name": "ResourceGroup",
+            "label": "Resource Group",
+            "type": 2,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resourceContainers | where type == 'microsoft.resources/subscriptions/resourcegroups'\r\n| project resourceGroup\r\n| order by resourceGroup asc",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "defaultValue": "value::all",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": [
+              "value::all"
+            ]
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "conditionalVisibility": {
+        "parameterName": "RG_Filter",
+        "comparison": "isEqualTo",
+        "value": "Resource Group"
+      },
+      "name": "parameters - 2"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "df2a5339-2dd6-478a-a2b1-2dce7651ed0a",
+            "version": "KqlParameterItem/1.0",
+            "name": "TagName",
+            "label": "Tag Name",
+            "type": 2,
+            "isRequired": true,
+            "query": "Resources\r\n| where tags != '' and tags != '[]'\r\n| mvexpand tags\r\n| extend tagName = tostring(bag_keys(tags)[0])\r\n| distinct tagName\r\n| order by tagName asc",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "value": null,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "conditionalVisibility": {
+        "parameterName": "RG_Filter",
+        "comparison": "isEqualTo",
+        "value": "Tags"
+      },
+      "customWidth": "20",
+      "name": "parameters - 3"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "70830650-0ad2-493e-ad15-5ccd8782484d",
+            "version": "KqlParameterItem/1.0",
+            "name": "TagValue",
+            "type": 2,
+            "isRequired": true,
+            "query": "Resources\r\n| mvexpand tags\r\n| extend tagName = tostring(bag_keys(tags)[0])\r\n| extend tagValue = tostring(tags[tagName])\r\n| where tags != '' and tags != '[]' and tostring(bag_keys(tags)[0]) == '{TagName}'\r\n| distinct tagValue\r\n| sort by tagValue asc",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "value": "Prod",
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "conditionalVisibilities": [
+        {
+          "parameterName": "RG_Filter",
+          "comparison": "isEqualTo",
+          "value": "Tags"
+        },
+        {
+          "parameterName": "TagName",
+          "comparison": "isNotEqualTo"
+        }
+      ],
+      "customWidth": "20",
+      "name": "parameters - 10"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "69dfc3f7-5937-49ba-9851-d6d2973a0c69",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Security and compliance",
+            "subTarget": "security",
+            "style": "link"
+          },
+          {
+            "id": "4afd48de-0d0c-4151-8339-7dca50018c56",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Defender for Cloud alerts",
+            "subTarget": "alerts",
+            "preText": "AppServices",
+            "style": "link"
+          },
+          {
+            "id": "4f4786a7-c2df-4788-b5b6-63057bc0c24a",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Regulatory security and compliance",
+            "subTarget": "standards",
+            "style": "link"
+          },
+          {
+            "id": "96d6402c-ff6c-4cf8-961d-8fbe5c98be60",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Defender for Cloud Recommendations",
+            "subTarget": "MDC",
+            "preText": "VirtualMachines",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "links - 4"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n| where type == \"microsoft.security/assessments\"\r\n| extend Problem = tostring(properties.displayName),\r\n         AffectedResource = tostring(properties.resourceDetails.Id),\r\n         Status = tostring(properties.status.code),\r\n         Description = tostring(properties.metadata.description),\r\n         Severity = tostring(properties.metadata.severity),\r\n         Remediation = strcat(\"https://\", tostring(properties.links.azurePortal))\r\n| where Status == \"Unhealthy\" and isnotempty(Severity)\r\n| where \"{ResourceGroup}\" == \"value::all\" or resourceGroup in ({ResourceGroup})\r\n| extend ResourceGroup = strcat(\"/subscriptions/\", subscriptionId, \"/resourceGroups/\", resourceGroup)\r\n| project AffectedResource, Problem, Severity, Remediation, ResourceGroup, subscriptionId, Description\r\n",
+                    "size": 0,
+                    "title": "Defender for Cloud recommendations",
+                    "noDataMessage": "You are following all of our security recommendations",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "gray",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "Open remediation"
+                          }
+                        },
+                        {
+                          "columnMatch": "resourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Description",
+                          "formatter": 1
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    }
+                  },
+                  "name": "query - 0"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isNotEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - MDC-Subscription"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n    | where type == \"microsoft.security/assessments\"\r\n    | extend Problem=properties.displayName,AffectedResource=tolower(properties.resourceDetails.Id),Status=properties.status.code,Description=properties.metadata.description,Severity=properties.metadata.severity,Remediation=strcat(\"https://\",properties.links.azurePortal)\r\n    | where Status==\"Unhealthy\" and isnotnull(Severity)\r\n    | project AffectedResource,Problem,Severity,Remediation,resourceGroup,subscriptionId,Description\r\n    | join ( resources | mvexpand tags | extend  AffectedResource=tolower(id), Tags=tags, resourceGroup \r\n    | extend tagName = tostring(bag_keys(tags)[0])\r\n    | extend tagValue = tostring(tags[tagName]) ) on AffectedResource\r\n    | extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n    | where tagName has '{TagName}' and tagValue has '{TagValue}'\r\n    | project  AffectedResource,Problem,Severity,Remediation,ResourceGroup,tagName,tagValue,subscriptionId,Description\r\n",
+                    "size": 0,
+                    "title": "Defender for Cloud recommendations",
+                    "noDataMessage": "You are following all of our security recommendations",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "gray",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "Open remediation"
+                          }
+                        },
+                        {
+                          "columnMatch": "ResourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "tagName",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "tagValue",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Description",
+                          "formatter": 1
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    }
+                  },
+                  "name": "query - 0"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - MDC-Tags"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "MDC"
+      },
+      "name": "group - MDC",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n| where type == \"microsoft.security/regulatorycompliancestandards\"\r\n| extend \r\n\tpassedControls = trim (' ', tostring(properties.passedControls)), \r\n\tfailedControls = trim(' ',tostring(properties.failedControls)), \r\n\tstate \t\t   = trim(' ', tostring(properties.state)), \r\n\tunsupportedControls = trim(' ', tostring(properties.unsupportedControls)), \r\n\tskippedControls     = trim(' ', tostring(properties.skippedControls))\r\n| project subscriptionId, name, passedControls, failedControls, unsupportedControls, skippedControls ,  link = \"https://portal.azure.com/?feature.customportal=false#blade/Microsoft_Azure_Security/SecurityMenuBlade/22\"\r\n| order by passedControls desc",
+                    "size": 0,
+                    "title": "Regulatory Standards Compliance",
+                    "exportedParameters": [
+                      {
+                        "fieldName": "name",
+                        "parameterName": "standardName",
+                        "parameterType": 1
+                      },
+                      {
+                        "fieldName": "subscriptionId",
+                        "parameterName": "subscriptionId",
+                        "parameterType": 1
+                      }
+                    ],
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "$gen_group",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": "Resource",
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 5,
+                          "formatOptions": {
+                            "linkTarget": "Resource"
+                          }
+                        },
+                        {
+                          "columnMatch": "name",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "passedControls",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "palette": "green"
+                          }
+                        },
+                        {
+                          "columnMatch": "failedControls",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "palette": "red"
+                          }
+                        },
+                        {
+                          "columnMatch": "link",
+                          "formatter": 5
+                        }
+                      ],
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "subscriptionId"
+                        ],
+                        "expandTopLevel": true
+                      },
+                      "labelSettings": [
+                        {
+                          "columnId": "name",
+                          "label": "Compliance Standard"
+                        },
+                        {
+                          "columnId": "passedControls",
+                          "label": "Passed Controls"
+                        },
+                        {
+                          "columnId": "failedControls",
+                          "label": "Failed Controls"
+                        },
+                        {
+                          "columnId": "unsupportedControls",
+                          "label": "Unsupported Controls"
+                        },
+                        {
+                          "columnId": "skippedControls",
+                          "label": "Skipped Controls"
+                        }
+                      ]
+                    }
+                  },
+                  "name": "query - 0"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n| where type == \"microsoft.security/regulatorycompliancestandards/regulatorycompliancecontrols\"\r\n| parse id with * \"/regulatoryComplianceStandards/\" ComplianceStandard \"/\" *\r\n| extend Description = properties.description\r\n| extend State = properties.state\r\n| extend Passed = properties.passedAssessments, Failed = properties.failedAssessments, Skipped = properties.skippedAssessments\r\n| where ComplianceStandard == \"{standardName}\" and subscriptionId==\"{subscriptionId}\"\r\n| project name, ComplianceStandard, Description, State, Passed, Failed, Skipped, subscriptionId\r\n| order by name asc",
+                    "size": 0,
+                    "title": "{standardName}",
+                    "exportedParameters": [
+                      {
+                        "fieldName": "ComplianceStandard",
+                        "parameterName": "complianceStandard",
+                        "parameterType": 1
+                      },
+                      {
+                        "fieldName": "Description",
+                        "parameterName": "Description",
+                        "parameterType": 1
+                      },
+                      {
+                        "fieldName": "subscriptionId",
+                        "parameterName": "subscriptionId",
+                        "parameterType": 1
+                      }
+                    ],
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "$gen_group",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Description",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "State",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Passed",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unsupported",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Failed",
+                                "representation": "error",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Passed",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Failed",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Skipped",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "subscriptionId"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    },
+                    "sortBy": []
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "standardName",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources \r\n| where type == \"microsoft.security/regulatorycompliancestandards/regulatorycompliancecontrols/regulatorycomplianceassessments\"\r\n| parse id with * \"/regulatoryComplianceStandards/\" ComplianceStandard \"/\" *\r\n//| parse id with * \"/regulatoryComplianceControls/\" ComplianceControl \"/\" *\r\n| where ComplianceStandard == \"{standardName}\"\r\n| extend assessment = name\r\n| join (securityresources| where type == \"microsoft.security/assessments\" | extend assessment=name,Problem=properties.displayName,AffectedResource=properties.resourceDetails.Id,Status=properties.status.code,Remediation=strcat(\"https://\",properties.links.azurePortal),Severity=properties.metadata.severity\r\n| parse AffectedResource with * \"/subscriptions/\" subscriptionId \"/\" *\r\n| parse AffectedResource with * \"/resourcegroups/\" RG \"/\" *) on assessment\r\n| where subscriptionId==\"{subscriptionId}\" and RG in ({ResourceGroup}) and Status != \"Healthy\"\r\n| extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",RG)\r\n| project ComplianceStandard,AffectedResource,Problem,Severity,Status,Remediation,ResourceGroup,subscriptionId\r\n",
+                    "size": 0,
+                    "title": "Affected resources",
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "ComplianceStandard",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "AffectedResource",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": "Resource",
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "blue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Status",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "NotApplicable",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Healthy",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unhealthy",
+                                "representation": "3",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "Open remediation"
+                          }
+                        },
+                        {
+                          "columnMatch": "ResourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "ComplianceControl",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Column1",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ],
+                        "expandTopLevel": false
+                      }
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "standardName",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 2"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isNotEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - regulatorySubscription"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n| where type == \"microsoft.security/regulatorycompliancestandards\"\r\n| extend \r\n\tpassedControls = trim (' ', tostring(properties.passedControls)), \r\n\tfailedControls = trim(' ',tostring(properties.failedControls)), \r\n\tstate \t\t   = trim(' ', tostring(properties.state)), \r\n\tunsupportedControls = trim(' ', tostring(properties.unsupportedControls)), \r\n\tskippedControls     = trim(' ', tostring(properties.skippedControls))\r\n| project subscriptionId, name, passedControls, failedControls, unsupportedControls, skippedControls ,  link = \"https://portal.azure.com/?feature.customportal=false#blade/Microsoft_Azure_Security/SecurityMenuBlade/22\"\r\n| order by passedControls desc",
+                    "size": 0,
+                    "title": "Regulatory Standards Compliance",
+                    "exportedParameters": [
+                      {
+                        "fieldName": "name",
+                        "parameterName": "standardName",
+                        "parameterType": 1
+                      },
+                      {
+                        "fieldName": "subscriptionId",
+                        "parameterName": "subscriptionId",
+                        "parameterType": 1
+                      }
+                    ],
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "passedControls",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "palette": "green"
+                          }
+                        },
+                        {
+                          "columnMatch": "failedControls",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "palette": "red"
+                          }
+                        },
+                        {
+                          "columnMatch": "link",
+                          "formatter": 5
+                        }
+                      ]
+                    }
+                  },
+                  "name": "query - 0"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources\r\n| where type == \"microsoft.security/regulatorycompliancestandards/regulatorycompliancecontrols\"\r\n| parse id with * \"/regulatoryComplianceStandards/\" ComplianceStandard \"/\" *\r\n| extend Description = properties.description\r\n| extend State = properties.state\r\n| extend Passed = properties.passedAssessments, Failed = properties.failedAssessments, Skipped = properties.skippedAssessments\r\n| where ComplianceStandard == \"{standardName}\" and subscriptionId==\"{subscriptionId}\"\r\n| project name, ComplianceStandard, Description, State, Passed, Failed, Skipped, subscriptionId\r\n| order by name asc",
+                    "size": 0,
+                    "title": "{standardName}",
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "$gen_group",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Description",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "State",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unsupported",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Passed",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Failed",
+                                "representation": "3",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Passed",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Failed",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Skipped",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "subscriptionId"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "standardName",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources \r\n| where type == \"microsoft.security/regulatorycompliancestandards/regulatorycompliancecontrols/regulatorycomplianceassessments\"\r\n| parse id with * \"/regulatoryComplianceStandards/\" ComplianceStandard \"/\" *\r\n//| parse id with * \"/regulatoryComplianceControls/\" ComplianceControl \"/\" *\r\n| where ComplianceStandard == \"{standardName}\"\r\n| extend assessment = name , resourceGroup\r\n| join (securityresources| where type == \"microsoft.security/assessments\" | project assessment=name,Problem=properties.displayName,AffectedResource=tostring(properties.resourceDetails.Id),Status=properties.status.code,Remediation=strcat(\"https://\",properties.links.azurePortal),Severity=properties.metadata.severity\r\n| parse AffectedResource with * \"/subscriptions/\" subscriptionId \"/\" *\r\n| parse AffectedResource with * \"/resourceGroups/\" RG \"/\" *) on assessment\r\n| join ( resources | mvexpand tags | extend  AffectedResource=id, Tags=tags ,resourceGroup\r\n| extend tagName = tostring(bag_keys(tags)[0])\r\n| extend tagValue = tostring(tags[tagName]) ) on AffectedResource\r\n| where tagName has '{TagName}' and tagValue has '{TagValue}' and Status != \"Healthy\"\r\n| extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",RG)\r\n| project ComplianceStandard,AffectedResource,Problem,Severity,Status,Remediation,tagName,tagValue,ResourceGroup,subscriptionId\r\n\r\n",
+                    "size": 0,
+                    "title": "Affected resources",
+                    "noDataMessage": "No affected resources",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "blue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Status",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Healthy",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unhealthy",
+                                "representation": "3",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "NotApplicable",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "Open remediation"
+                          }
+                        },
+                        {
+                          "columnMatch": "tagName",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "tagValue",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "ResourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ],
+                        "expandTopLevel": false
+                      },
+                      "sortBy": [
+                        {
+                          "itemKey": "$gen_count_$gen_group_0",
+                          "sortOrder": 2
+                        }
+                      ]
+                    },
+                    "sortBy": [
+                      {
+                        "itemKey": "$gen_count_$gen_group_0",
+                        "sortOrder": 2
+                      }
+                    ]
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "standardName",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 2"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - regulatoryTags"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "standards"
+      },
+      "name": "group - regulatoryCompliance",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/pricings\"\r\n| extend PricingTier = tostring(properties.pricingTier)\r\n| summarize DefenderEnabled=countif(PricingTier == \"Standard\") by subscriptionId",
+              "size": 1,
+              "title": "Microsoft Defender (CWP) Enabled",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "gridSettings": {
+                "rowLimit": 10000,
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "DefenderEnabled",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "0",
+                          "representation": "disabled",
+                          "text": ""
+                        },
+                        {
+                          "operator": ">",
+                          "thresholdValue": "0",
+                          "representation": "success",
+                          "text": ""
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "success",
+                          "text": ""
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_link_subscriptionId_0",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_link_subscriptionId_0",
+                  "sortOrder": 1
+                }
+              ],
+              "exportedParameters": [
+                {
+                  "fieldName": "DefenderEnabled",
+                  "parameterName": "defenderEnabledParam",
+                  "parameterType": 1
+                }
+              ]
+            },
+            "customWidth": "40",
+            "name": "query - 4"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "parameters": [
+                      {
+                        "id": "a3e9cef6-3cff-444a-8e5e-e7613f91cb77",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "numberOfAlerts",
+                        "type": 2,
+                        "isRequired": true,
+                        "query": "  securityresources\r\n  | where type =~ 'microsoft.security/locations/alerts'\r\n  | where properties.Status in ('Active')\r\n  | count\r\n  | project numberOfAlerts = Count",
+                        "crossComponentResources": [
+                          "{Subscription}"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::1"
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::1",
+                        "queryType": 1,
+                        "resourceType": "microsoft.resourcegraph/resources"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "isVisible",
+                    "comparison": "isEqualTo",
+                    "value": "false"
+                  },
+                  "name": "parameters - numberOfAlerts"
+                },
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "## The selected subscription(s) have no alerts",
+                    "style": "success"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "numberOfAlerts",
+                    "comparison": "isEqualTo",
+                    "value": "0"
+                  },
+                  "name": "text - numberOfAlerts"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "  securityresources\r\n  | where type =~ 'microsoft.security/locations/alerts'\r\n  | where properties.Status in ('Active') and isnotempty(resourceGroup)\r\n  | where resourceGroup in ({ResourceGroup})\r\n  | mvexpand Resource=properties.ResourceIdentifiers\r\n  | where isnotempty(Resource.AzureResourceId)\r\n  | extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n  | project ResourceName=Resource.AzureResourceId, Alert=tostring(properties.AlertDisplayName) , TimeGenerated=tostring(properties.TimeGeneratedUtc), Severity=tostring(properties.Severity),Type=tostring(properties.AlertType) , Remediation=properties.AlertUri,Intent=tostring(properties.Intent),Details=tostring(properties.ExtendedProperties),ResourceGroup,subscriptionId",
+                    "size": 0,
+                    "title": "Active Security Alerts",
+                    "noDataMessage": "There are no active alerts",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000
+                    }
+                  },
+                  "conditionalVisibilities": [
+                    {
+                      "parameterName": "isVisible",
+                      "comparison": "isEqualTo",
+                      "value": "false"
+                    },
+                    {
+                      "parameterName": "numberOfAlerts",
+                      "comparison": "isNotEqualTo",
+                      "value": "0"
+                    }
+                  ],
+                  "name": "query - alertsByResourceGroup"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "  securityresources\r\n  | where type =~ 'microsoft.security/locations/alerts'\r\n  | where properties.Status in ('Active') and isempty(resourceGroup)\r\n  | mvexpand Resource=properties.ResourceIdentifiers\r\n  | where isnotempty(Resource.AzureResourceId)\r\n  | extend ResourceGroup='N/A'\r\n  | project ResourceName=Resource.AzureResourceId, Alert=tostring(properties.AlertDisplayName) , TimeGenerated=tostring(properties.TimeGeneratedUtc), Severity=tostring(properties.Severity),Type=tostring(properties.AlertType) , Remediation=properties.AlertUri,Intent=tostring(properties.Intent),Details=tostring(properties.ExtendedProperties),ResourceGroup,subscriptionId",
+                    "size": 0,
+                    "title": "Active Security Alerts",
+                    "noDataMessage": "There are no active alerts",
+                    "noDataMessageStyle": 3,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000
+                    }
+                  },
+                  "conditionalVisibilities": [
+                    {
+                      "parameterName": "isVisible",
+                      "comparison": "isEqualTo",
+                      "value": "false"
+                    },
+                    {
+                      "parameterName": "numberOfAlerts",
+                      "comparison": "isNotEqualTo",
+                      "value": "0"
+                    }
+                  ],
+                  "name": "query - alertsBySubscription"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\",\"mergeType\":\"union\",\"leftTable\":\"query - alertsByResourceGroup\",\"rightTable\":\"query - alertsBySubscription\"}],\"projectRename\":[{\"originalName\":\"[query - alertsByResourceGroup].ResourceName\",\"mergedName\":\"ResourceName\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Alert\",\"mergedName\":\"Alert\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].TimeGenerated\",\"mergedName\":\"TimeGenerated\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Severity\",\"mergedName\":\"Severity\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Type\",\"mergedName\":\"Type\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Remediation\",\"mergedName\":\"Remediation\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Intent\",\"mergedName\":\"Intent\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].Details\",\"mergedName\":\"Details\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].ResourceGroup\",\"mergedName\":\"ResourceGroup\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"[query - alertsByResourceGroup].subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"22dfe6a0-2296-45dd-951e-1d2e5805d05a\"},{\"originalName\":\"ResourceName\",\"mergedName\":\"ResourceName\",\"fromId\":\"unknown\"},{\"originalName\":\"Alert\",\"mergedName\":\"Alert\",\"fromId\":\"unknown\"},{\"originalName\":\"TimeGenerated\",\"mergedName\":\"TimeGenerated\",\"fromId\":\"unknown\"},{\"originalName\":\"Severity\",\"mergedName\":\"Severity\",\"fromId\":\"unknown\"},{\"originalName\":\"Type\",\"mergedName\":\"Type\",\"fromId\":\"unknown\"},{\"originalName\":\"Remediation\",\"mergedName\":\"Remediation\",\"fromId\":\"unknown\"},{\"originalName\":\"Intent\",\"mergedName\":\"Intent\",\"fromId\":\"unknown\"},{\"originalName\":\"Details\",\"mergedName\":\"Details\",\"fromId\":\"unknown\"},{\"originalName\":\"ResourceGroup\",\"mergedName\":\"ResourceGroup\",\"fromId\":\"unknown\"},{\"originalName\":\"subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"unknown\"}]}",
+                    "size": 0,
+                    "title": "Active Security Alerts",
+                    "noDataMessage": "There are no active alerts",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 7,
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "ResourceName",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "lightBlue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "rowLimit": 10000,
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Alert"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "numberOfAlerts",
+                    "comparison": "isNotEqualTo",
+                    "value": "0"
+                  },
+                  "showPin": false,
+                  "name": "query - defenderAlerts"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isNotEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - alertsSubscription"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "## Microsoft Defender (CWP) needs to be enabled for the subscription(s) you choose to be able to view alerts\r\n",
+                    "style": "info"
+                  },
+                  "name": "text - 1",
+                  "conditionalVisibility": {
+                    "parameterName": "defenderEnabledParam",
+                    "comparison": "isEqualTo",
+                    "value": "0"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "  securityresources\r\n  | where type =~ 'microsoft.security/locations/alerts'\r\n  | where properties.Status in ('Active')\r\n  | mvexpand Resource=properties.ResourceIdentifiers\r\n  | where isnotempty(Resource.AzureResourceId)\r\n  | extend ResourceName=tostring(Resource.AzureResourceId), Alert=properties.AlertDisplayName , TimeGenerated=properties.TimeGeneratedUtc, Severity=properties.Severity,Type=properties.AlertType , Remediation=properties.AlertUri,Intent=properties.Intent,Details=properties.ExtendedProperties\r\n  | project ResourceName,Alert ,TimeGenerated, Severity,Type, Remediation,Intent,Details,resourceGroup,subscriptionId\r\n  | join ( resources | mvexpand tags | extend  ResourceName=id, Tags=tags, resourceGroup \r\n  | extend tagName = tostring(bag_keys(tags)[0])\r\n  | extend tagValue = tostring(tags[tagName]) ) on ResourceName\r\n  | extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n  | where tagName has '{TagName}' and tagValue has '{TagValue}'\r\n  | project ResourceName,Alert ,TimeGenerated, Severity,Type, Remediation,Intent,Details,tagName,tagValue,ResourceGroup,subscriptionId",
+                    "size": 0,
+                    "title": "Active Security Alerts",
+                    "noDataMessage": "There are no active alerts",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "Alert",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "TimeGenerated",
+                          "formatter": 6
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "blue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Type",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "More Information"
+                          }
+                        },
+                        {
+                          "columnMatch": "Intent",
+                          "formatter": 1
+                        },
+                        {
+                          "columnMatch": "tagName",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "tagValue",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "resourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Alert"
+                        ],
+                        "expandTopLevel": true
+                      }
+                    }
+                  },
+                  "name": "query - 0"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - alertsTags"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "alerts"
+      },
+      "name": "group - Alerts",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| where properties.environment == \"Azure\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc\r\n| summarize AverageScore = toint(avg(subscriptionSecureScore))",
+              "size": 4,
+              "title": "Overall Secure Score",
+              "noDataMessage": "No secure score calculated for the selected subscription(s)",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {
+                  "columnMatch": "AverageScore",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "min": 0,
+                    "max": 100,
+                    "palette": "redGreen"
+                  },
+                  "numberFormat": {
+                    "unit": 1,
+                    "options": {
+                      "style": "decimal"
+                    }
+                  },
+                  "tooltipFormat": {
+                    "tooltip": "Overall Secure Score of selected subscriptions"
+                  }
+                },
+                "showBorder": false,
+                "size": "auto"
+              }
+            },
+            "customWidth": "20",
+            "name": "query - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| where properties.environment == \"Azure\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc",
+              "size": 1,
+              "title": "Secure Score per Subscription",
+              "noDataMessage": "No secure score calculated for the selected subscription(s)",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "gridSettings": {
+                "rowLimit": 10000,
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionSecureScore",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "max": 100,
+                      "palette": "redGreen"
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  }
+                ]
+              }
+            },
+            "customWidth": "40",
+            "name": "query - 1"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "parameters": [
+                      {
+                        "id": "189af956-ff22-482b-b8f1-6dd31dba5b39",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "ControlArea",
+                        "label": "Control Area",
+                        "type": 2,
+                        "isRequired": true,
+                        "query": "securityresources\r\n| where type == \"microsoft.security/securescores/securescorecontrols\"\r\n| extend Control=tostring(properties.displayName)\r\n| distinct Control",
+                        "crossComponentResources": [
+                          "{Subscription}"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "queryType": 1,
+                        "resourceType": "microsoft.resourcegraph/resources",
+                        "value": "Implement security best practices"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources"
+                  },
+                  "name": "parameters - 0"
+                },
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "parameters": [
+                      {
+                        "id": "5d28e3ce-fe0f-4d59-8e13-b01c61ca13a0",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Policy",
+                        "type": 2,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "query": "securityresources\r\n| where type == \"microsoft.security/securescores/securescorecontrols\"\r\n| extend Control=tostring(properties.displayName)\r\n| where Control == '{ControlArea}'\r\n| mvexpand Policies=properties.definition.properties.assessmentDefinitions\r\n| extend PolicyID= Policies.id\r\n| parse PolicyID with * \"/assessmentMetadata/\" AssessmentName\r\n| project AssessmentName\r\n| join (securityresources | where type == \"microsoft.security/assessments\" | extend AssessmentName=name) on AssessmentName\r\n| extend Policy=tostring(properties.displayName)\r\n| distinct Policy",
+                        "crossComponentResources": [
+                          "{Subscription}"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all",
+                        "queryType": 1,
+                        "resourceType": "microsoft.resourcegraph/resources",
+                        "value": [
+                          "value::all"
+                        ]
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources"
+                  },
+                  "name": "parameters - 2"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources \r\n| where type == \"microsoft.security/assessments\"\r\n| extend assessment=name,Problem=properties.displayName,AffectedResource=tostring(properties.resourceDetails.Id),Status=tostring(properties.status.code),Remediation=strcat(\"https://\",properties.links.azurePortal),Severity=properties.metadata.severity\r\n| where Problem in ({Policy}) and resourceGroup in ({ResourceGroup}) and Status == \"Unhealthy\"\r\n| project assessment,Problem,AffectedResource,Severity,Status,Remediation,resourceGroup,subscriptionId\r\n| extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n| project assessment,Problem,AffectedResource,Severity,Status,Remediation,ResourceGroup,subscriptionId",
+                    "size": 0,
+                    "title": "Resource Compliance",
+                    "noDataMessage": "No recommendations for the selected control",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "assessment",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "blue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Status",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Healthy",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unhealthy",
+                                "representation": "3",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "NotApplicable",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "More Information"
+                          }
+                        },
+                        {
+                          "columnMatch": "resourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ],
+                        "expandTopLevel": false
+                      },
+                      "sortBy": [
+                        {
+                          "itemKey": "$gen_thresholds_Status_5",
+                          "sortOrder": 2
+                        }
+                      ]
+                    },
+                    "sortBy": [
+                      {
+                        "itemKey": "$gen_thresholds_Status_5",
+                        "sortOrder": 2
+                      }
+                    ]
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "Policy",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 3"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isNotEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - securityCompliance-Subscription"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "parameters": [
+                      {
+                        "id": "f35979ca-5845-49ec-9755-04b034c5ce2d",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "ControlArea",
+                        "label": "Control Area",
+                        "type": 2,
+                        "isRequired": true,
+                        "query": "securityresources\r\n| where type == \"microsoft.security/securescores/securescorecontrols\"\r\n| extend Control=tostring(properties.displayName)\r\n| distinct Control",
+                        "crossComponentResources": [
+                          "{Subscription}"
+                        ],
+                        "value": "Remediate security configurations",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "queryType": 1,
+                        "resourceType": "microsoft.resourcegraph/resources"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources"
+                  },
+                  "name": "parameters - 0"
+                },
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "parameters": [
+                      {
+                        "id": "cbfee95f-f170-4317-ad90-b6fc90f73540",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Policy",
+                        "type": 2,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "query": "securityresources\r\n| where type == \"microsoft.security/securescores/securescorecontrols\"\r\n| extend Control=tostring(properties.displayName)\r\n| where Control == '{ControlArea}'\r\n| mvexpand Policies=properties.definition.properties.assessmentDefinitions\r\n| extend PolicyID= Policies.id\r\n| parse PolicyID with * \"/assessmentMetadata/\" AssessmentName\r\n| project AssessmentName\r\n| join (securityresources | where type == \"microsoft.security/assessments\" | extend AssessmentName=name) on AssessmentName\r\n| extend AssessmentName,Policy=tostring(properties.displayName)\r\n| distinct Policy",
+                        "crossComponentResources": [
+                          "{Subscription}"
+                        ],
+                        "value": [
+                          "value::all"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all",
+                        "queryType": 1,
+                        "resourceType": "microsoft.resourcegraph/resources"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources"
+                  },
+                  "name": "parameters - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "securityresources \r\n| where type == \"microsoft.security/assessments\"\r\n| extend assessment=name,Problem=properties.displayName,AffectedResource=tolower(properties.resourceDetails.Id),Status=tostring(properties.status.code),Remediation=strcat(\"https://\",properties.links.azurePortal),Severity=properties.metadata.severity\r\n| project assessment,Problem,AffectedResource,Severity,Status,Remediation,resourceGroup,subscriptionId\r\n| where Problem in ({Policy}) and Status == \"Unhealthy\"\r\n| join (resources | mvexpand tags| extend AffectedResource = tolower(id),Tags=tags, resourceGroup \r\n| extend tagName = tostring(bag_keys(tags)[0])\r\n| extend tagValue = tostring(tags[tagName])\r\n| where tagName has '{TagName}' and tagValue has '{TagValue}'\r\n| project AffectedResource,tagName,tagValue) on AffectedResource\r\n| extend ResourceGroup=strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n| project assessment,Problem,AffectedResource,Severity,Status,Remediation,tagName,tagValue,ResourceGroup,subscriptionId",
+                    "size": 0,
+                    "title": "Resource Compliance",
+                    "noDataMessage": "No recommendations for the selected controls",
+                    "noDataMessageStyle": 3,
+                    "showExportToExcel": true,
+                    "queryType": 1,
+                    "resourceType": "microsoft.resourcegraph/resources",
+                    "crossComponentResources": [
+                      "{Subscription}"
+                    ],
+                    "gridSettings": {
+                      "rowLimit": 10000,
+                      "formatters": [
+                        {
+                          "columnMatch": "assessment",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Problem",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Severity",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "colors",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "High",
+                                "representation": "redBright",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Medium",
+                                "representation": "orange",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Low",
+                                "representation": "turquoise",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "blue",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Status",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Healthy",
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "Unhealthy",
+                                "representation": "3",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "==",
+                                "thresholdValue": "NotApplicable",
+                                "representation": "unknown",
+                                "text": "{0}{1}"
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "success",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "Remediation",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "Url",
+                            "linkLabel": "More Information"
+                          }
+                        },
+                        {
+                          "columnMatch": "tagName",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "tagValue",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Tags",
+                                "text": "{0}{1}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "columnMatch": "subscriptionId",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "resourceGroup",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Problem"
+                        ]
+                      }
+                    }
+                  },
+                  "name": "query - 2"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "RG_Filter",
+              "comparison": "isEqualTo",
+              "value": "Tags"
+            },
+            "name": "group - securityCompliance-Tags"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "security"
+      },
+      "name": "group - securityCompliance",
+      "styleSettings": {
+        "showBorder": true
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Security Center"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
